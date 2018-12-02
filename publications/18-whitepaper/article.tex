@@ -90,11 +90,26 @@ Therefore, users must be able to express their workflows in an abstract fashion 
 
 \subsection{Experimental Planning}
 
-Workflows, experimental design to result production.
+Knowledge about workflow execution and overall experimental design can help to
+optimize execution and environments.
+From the perspective of scientists and engineers, the time-to-solution from experimental design to insight matters.
+At the moment, users of public data center services supply limited information about their experiments, typically the level of detail is like "I need X CPU hours and Y storage capacity".
+Still, the systems these workflows later will run cost 10 or 100 million of dollars.
+Compare this to other experiments conducted in physics like the Large Hadron Collider (LHC) at CERN or the Square Kilometer Array (SKA) which may need years of planning.
+While it is important to keep some freedom to explore ad-hoc experiments, we raise the question what could the HPC community achieve knowing workflows in more detail.
+%Kubernetes
 
-Simulation
+\subsubsection{Example Workflow}
 
-\Cref{fig:workflow}
+The execution of a workflow is illustrated in \Cref{fig:workflow}.
+Arrows indicate dependencies between tasks and data.
+Note that we expect that the nodes are annotated with characteristics of the workflow;
+data can be annotated with metadata describing its content, the expected data life cycle information, e.g., the value of data and how long should it be kept; tasks can be annotated with the information to run them and runtime.
+
+Task\,1 needs two datasets to perform its work, it directly communicates with Task\,2 and produces Product\,1.
+Most of the workflow can run automatically except the manual quality control of the products and the final data usage of Product\,3 at the end.
+The last step represents the typical uncertainty of data reuse, when this workflow is created it is unclear how Product\,3 will be used further, it is apparent that it will be.
+Further workflows that use the data may be created similarly and use the product as input.
 
 \begin{figure}[b]
   \centering
@@ -102,6 +117,13 @@ Simulation
   \caption{Example High-Level Workflow without Characteristics}
   \label{fig:workflow}
 \end{figure}
+
+\subsubsection{Exploiting Workflow Descriptions}
+
+Under the assumption
+Simulation
+
+
 
 
 
