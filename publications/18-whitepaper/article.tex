@@ -61,6 +61,19 @@ From the system perspective, NGI aims to derive an execution plan that utilizes 
 
 \section{Introduction}
 
+Zoo of approaches and interfaces.
+POSIX has been branded as dead.
+Evolution of POSIX?
+
+Cloud definition of desired state and contracts.
+
+HPC difficult to use.
+
+
+Indeed many research prototypes address subproblems
+* But not all aspects together
+* Competing approaches; the standardization we describe here does not compete!
+
 \subsection{Heterogeneous Systems}
 
 The variety of tasks executed by a single workflow may benefit from a heterogeneous storage and compute infrastructure and potentially even spanning multiple locations.
@@ -118,12 +131,96 @@ Further workflows that use the data may be created similarly and use the product
   \label{fig:workflow}
 \end{figure}
 
-\subsubsection{Exploiting Workflow Descriptions}
-
-Under the assumption
-Simulation
 
 
+
+\section{NGI Vision}
+
+Our vision for Next Generation Interfaces is a new approach for data management and data-driven computation.
+%\paragraph{Data Model}
+NGI tackles the challenge of storage and data-flow computation in an holistic way, accepting that data storage is only aiding the goal of generating insight.
+Besides providing a typical abstract data model, NGI treats domain metadata\footnote{Therewith, we mean non-technical information about the data, for instance, the name of an experiment.}, workflows, and information lifecycle management as first-class citizens.
+This user information is exploited by smart components of NGI which target to exploit heterogeneous system landscapes.
+To describe the features and benefits of the approach further, we sketch the user and system perspective in the following, as this highlights how we believe we should work in the 21st century.
+The vision covers not only HPC but spans cloud, enterprise, and personalized IT.
+
+\subsection{User Perspective}
+
+\newcommand{\bnf}[1]{\textless #1\textgreater}
+
+From the users perspective, the interface and system matches the core requirements and expectations including reliability, availability, and usability.
+
+\paragraph{Data model:} the data model is derived from state-of-the-art solutions like HDF5.
+However, it abstracts from data localization and low-level concepts like files and directories and puts its focus on data organization and data structures.
+The integration into applications is shown in \Cref{fig:ngilayers}.
+Applications may utilize the NGI API directly, or utilize existing middleware\footnote{Which typically won't be able to utilize the full set of features.}.
+From the perspective of a developer of middleware or an application like web publishing, NGI provides a common feature set that reduces the amount of code replication inside domain-specific solutions.
+
+
+\paragraph{Namespace:} data is accessed using information from the domain metadata, i.e., similar to using methods of data indexing services.
+The system won't relying on a hierarchical namespace but a dynamic mapping to the POSIX namespace can be provided to enable compatibility for POSIX applications.
+For example, a user may decide to see a hierarchy like an experiments \bnf{Date}/\bnf{Name}/\bnf{Timestep}/\bnf{Variable}.
+
+\paragraph{Workflow specification:} the user defines a workflow describing the intentions of data manipulation and the data lifecycle including manual (user) involvement in the data processing.
+This also includes the definition of constraints, for instance, deadlines for the generation of the final data products (insight).
+Workflows can be defined using arbitrary tools including Python.
+Note that a user does not provide a concrete mapping to system or infrastructure but expects that the system derives an optimized execution plan that covers heterogeneous infrastructures.
+It does not matter where data is processed and if and where data is stored but only that the desired result with all constraints is met.
+Workflows are recorded and data lineage of data products can be inspected by the user upon demand allowing to reproduce and validate correct execution of experiments.
+
+
+\paragraph{Behavioral contracts:}
+Besides the core characteristics, users expect the execution of their workflows under constraints (including cost and time constraints).
+The system is expected to always show the expected characteristics and shield the user from system-specifics and undesired events (like faults or data loss).
+The characteristics may improve over time, for instance, by expanding hardware capabilities, but the user won't have to change their workflow specification.
+Still, for expert users, tools for introspecting system state and decision making are  provided.
+
+\paragraph{Prescriptive analysis:} a toolset for users and administrators allows to explore scenarios.
+Similarly, to an SQL Explain statement, this provides an unprecedented level of introspection, for instance, to predict the runtime or execution costs of a workflow on a given system.
+Sharing the workflow description to vendors result in predictions for runtime and costs.
+The ecosystem may also prescribe alternative systems to use, e.g., this part of the workflow will be run on data center A and this part on cloud provider B.
+
+
+
+\subsection{System Perspective}
+
+An implementation of the NGI API exploits the user-supplied information and system characteristics intelligently to meet the user expectations and smartly use heterogeneous compute and storage landscapes.
+It is expected that machine learning techniques will be applied to serve the individual aspects and evolve the systems over time.
+
+\paragraph{Awareness:}
+the system knows and understands user metadata and the overarching workflows (with the user intentions).
+It is self-aware, knowing the nominal characteristics of the hardware and software components, constantly comparing the system and workflow state with the expectations to perform mitigating actions to heal deviations.
+At best, each individual hardware component would ship with a behavioral model that can be integrated hierarchically up to a global system model.
+With behavioral models we not only mean performance models but reliability and cost-models as well.
+
+\paragraph{Resource management:}
+the system is in charge to manage and provision the available hardware resources autonomously.
+Ultimately, it aims to utilize the individual characteristics of heterogeneous compute and storage landscapes by utilizing intelligent scheduling.
+Data placement and localization is beyond mere tiering strategies, parts of data may be placed on certain storage technology, or replicated in different representations across storage characteristics.
+Therewith, serving different access patterns and workflows at the same time.
+Naturally, the system will replicate (expand) upon the availability of storage space while reducing redundancy under shortage of space.
+
+\paragraph{Liquid computing:}
+the system is in charge to manage and provision the available hardware resources autonomously and to assign compute and storage resources to tasks.
+Therewith, it may use, e.g., GPU, CPU, and in-network computing capabilities to serve pieces of a single workflow.
+We call this concept \textbf{liquid computing} as the compute resources are dynamically provisioned and assigned while data flows through the system it is processed.
+Naturally, processing closer to the data sources is likely to improve system throughput.
+
+
+\paragraph{Scheduling:}
+supplied with user workflows and their characteristics, the system derives execution plans for the computation and make data placement decisions that aim to utilize the available hardware resources.
+As NGI is in charge in both, it may decide to trade computation vs. storage capacity; for example, enabling automatic recomputation of intermediate states.
+Similarly, the scheduler may decide to couple subsequent steps of a workflow directly without storing intermediate data products on persistent storage.
+Data might be replicated but enables the system to rerun parts of the workflow in case of a data loss.
+
+The automatic scheduling is key to efficient processing and will allow constant improvement without forcing user to adjust their workflows.
+In most cases, individual resources are not used exclusively by a single task but QoS methods ensure that constraints of workflows are met.
+
+
+\paragraph{Extensible ecosystem:}
+the hardware and software landscape will be open allowing to connect solutions from different vendors.
+Imagine that a certain class of workflows performs inefficiently on a given infrastructure indicating a crucial processing or storage capability is missing.
+Adding new capabilities or resources to the system will allow the scheduler to use them in subsequent user-workflows similarly easy to an appliance.
 
 
 
@@ -136,34 +233,20 @@ Simulation
 
 
 
-\Cref{fig:heterogeneous}
-
-\section{Goals of NGI}
-
-Cover storage and data-flow computation together
-* Utilizing heterogeneous storage and compute landscapes
-I Scheduler optimizes plans; beyond tiering; liquid computing
-* Smart hardware and software components
-I Self-aware system instead of unconscious
-I Improving over time (self-learning, hardware upgrades)
-
-* User metadata, ILM, and workflows as first-class citizens
-
-Indeed many research prototypes address subproblems
-* But not all aspects together
-* Competing approaches; the standardization does not compete!
-
-
-Scheduler
-
-liquid computing
-
-
 
 \section{Community Strategy}
 
-We aim to establish the NGI Forum that curates the development of the APIs.
-\Cref{fig:standardization}
+We are in the process to establish the NGI Forum that curates the development of the APIs.
+The process will share the idea with the successful MPI Forum, the approach is sketched in \Cref{fig:standardization}.
+Members are experts from domain science, industry and data centers and form the bodies
+which activity is lead by the elected steering board.
+Topic-specific workgroups and committees develop the standard (data model and APIs) driven by relevant use-cases encompassing the span from workflows to code snippets.
+Ultimately, we will support the creation of a reference implementation based on state-of-the-art technology that demonstrates the approach on the use-cases.
+We are aware that this endeavor is challenging; therefore, we won't expect that NGI 1.0 will include every feature.
+%We will settle on the set of features that the consortium identifies
+%Similar to the way MPI 1.0 has grown, .
+
+We expect that vendors and researchers will embrace the open ecosystem similarly to MPI and explore and contribute to the forum and its development.
 
 \begin{figure}[b]
   \includegraphics[width=\columnwidth]{standardization}
@@ -172,6 +255,8 @@ We aim to establish the NGI Forum that curates the development of the APIs.
 \end{figure}
 
 \section{Conclusions}
+
+Open ...
 
 \includegraphics[width=2cm]{ngi-logo}
 
