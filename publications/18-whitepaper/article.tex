@@ -61,6 +61,8 @@ From the system perspective, NGI aims to derive an execution plan that utilizes 
 
 \section{Introduction}
 
+\textbf{IGNORE THIS INCOMPLETE SECTION FOR NOW.}
+
 Zoo of approaches and interfaces.
 POSIX has been branded as dead.
 Evolution of POSIX?
@@ -215,7 +217,7 @@ The capabilities of different hardware components may be limited realizing only 
 
 \paragraph{Smart scheduling:}
 supplied with user workflows and their characteristics, the system derives execution plans for the computation and make data placement decisions that aim to utilize the available hardware resources.
-As NGI is in charge for both, it may decide to trade computation vs. storage capacity or other characteristics (e.g., costs, energy consumption); for example, enabling automatic recomputation of intermediate states.
+As NGI is in charge for both, it may decide to trade computation vs. storage capacity or other characteristics (e.g., costs, energy consumption); for example, enabling automatic recomputation of intermediate states utilizing virtualization and container technologies.
 Similarly, the scheduler may decide to couple subsequent steps of a workflow directly without storing intermediate data products on persistent storage.
 Data might be replicated but enables the system to rerun parts of the workflow in case of a data loss.
 
@@ -242,6 +244,49 @@ Adding new capabilities or resources to the system will allow the scheduler to u
 \section{Next Generation Workflows}
 
 This section illustrates how workflows using NGI could be run and optimized by a smart runtime implementation of NGI.
+
+
+\subsection{Climate/Weather in 2020+}
+
+This workflow gives an idea how the climate and weather community could utilize emerging concepts in 2020+.
+A generic overview of the workflows for climate and weather is given in \Cref{fig:climateWeather}.
+
+Prediction of the weather in the near future (hours, known as nowcasting; days or weeks -- seasonal) is performed by executing workflows consisting of several processing steps. The execution of a workflow engine that orchestrates the individual execution steps is not explicitly included in the workflow description.
+
+For weather prediction, these workflows are schedules on a regular basis, e.g., a prediction is performed every 4 hours. The prediction is based on observational data and outputs data products that are processed further and distributed to customers.
+
+\subsubsection{Execution of a weather workflow}
+
+
+
+\begin{figure}[b]
+  \includegraphics[width=\columnwidth]{climateweather-workflow}
+  \caption{Future Climate and Weather Workflows}
+  \label{fig:climateWeather}
+\end{figure}
+
+
+First, data sources providing up-to-date data (such as near-real-time satellite sources and weather stations, I1) are ingested into a local permanent repository (S1). These data may be supplemented by the increasing number of IoT and mobile sensor devices (I2) which data may be stored in a short-term storage (S2) with a limited life-time.
+A weather service utilizing a HPC site ingests this data onto a local repository (S3). During this process, observational data is cleaned and reduced, e.g., by reducing resolution (subsampling).
+An ensemble of forecasts (several parallel simulation applications) are started using a subset of the latest weather information -- typically each of the applications differs only in how the simulation is initialized.
+They start with a warm up period using data from, e.g., 24 hours in the past. While a forecast runs it may use the data from I1/I2 to augment the simulated data with actual observations until the model time and the actual time matches and prediction of future weather starts.
+While the ensemble of forecast runs, it computes various relevant output variables that may be stored in a transient data buffer (S4) and/or perform data transformation and analysis in-situ/in-transit. For example, a computed variables may be output, visualized and analyzed further by users even as the simulation continues. To identify patterns (events of interests for meteorologists), machine learning may be applied in the processing pipeline. Identified events may trigger further actions on the visualization, triggering additional data outputs, and controlling data reduction. To reduce the data volume for the ensemble, a data reduction selectively chooses data from the ensemble to preserve (on the repository S3, just before it is stored in the archive S5); this may be a typical run/minimum/maximum or runs that contain certain events as identified from the machine learning.
+The generation of data products is either known beforehand, and calculated using a workflow during the ensemble run, or calculated post-mortem.
+The former case is typical for weather applications. In the latter case, data products can be created offline from the stored output of the forecasts -- this allows users to request new or modified data products from the simulations via the web interface.
+Machine learning can be applied in this workflow to identify relevant patterns in the data, supervised training involves the scientist selecting the phenomenon of interest presumably interactively using data visualization. The system should be able to quickly build a model and suggest other data with the similar phenomena to reduce the effort of the scientist to browse through all the data.
+
+A selection of data products together are stored on a long-term (permanent) archive (S5).
+Scientists over the world typically interact with web services to access data products on the long-term archive or to apply certain post-processing procedures to create new data products. This data is typically cached (S6) both at source before dissemination and by users in their workflow. When a new data product is requested it may actually trigger the recomputation of the data because it is cheaper than keeping all data products on a permanent storage.
+
+Note that the box depicts “HPC-sites” that executes most parts of the workflow, however, not necessarily this must be a single data center. Scientists already work in a distributed fashion, downloading certain data products and performing subsequent data analysis locally, on other remote sites, data centers, or in the cloud. It is expected, thought, that the initial data production is kept on the site where the data is produced as the data volume is reduced significantly in this process.
+
+\subsubsection{Execution of a climate workflow}
+
+Generation of insight for a climate experiment differs from the weather case by several aspects: Firstly, the data (S2) from IOT devices (I2) is not used.
+Secondly, in most cases scientists conduct new experiments, i.e., the result is a-prior unknown. Thus, a more exploratory and interactive use is expected.
+For model intercomparison projects, once the variables and experiments to investigate are clear, a mass replication (execution) of the use case under different starting conditions takes place. These planned experiments come with less explorative nature, yet diagnosis of abnormal execution behavior may be investigated interactively.
+Due to the vast amount of different experiments, the data management features of NGI are useful to simplify the data handling; for instance, by utilizing scientific metadata to specify the difference between different experiments differences between model output can be computed directly.
+
 
 \subsection{Extreme Data Generation}
 
