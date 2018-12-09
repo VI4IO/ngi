@@ -225,6 +225,7 @@ Note that this significant change for HPC environments, as compute resources are
 
 \paragraph{Extensible ecosystem:}
 the hardware and software landscape will be open allowing to integrate solutions from different hardware and software vendors.
+Systems connected may use different interfaces including traditional POSIX interfaces, NoSQL, or distributed hash tables.
 Imagine that a certain class of workflows performs inefficiently on a given infrastructure indicating a crucial processing or storage capability is missing.
 Adding new capabilities or resources to the system will allow the scheduler to use them in subsequent user-workflows speeding up the processing; this should be as easy as adding an appliance to a business environment.
 
@@ -237,6 +238,56 @@ Adding new capabilities or resources to the system will allow the scheduler to u
   \label{fig:ngilayers}
 \end{figure}
 
+
+\section{Next Generation Workflows}
+
+This section illustrates how workflows using NGI could be run and optimized by a smart runtime implementation of NGI.
+
+\subsection{Extreme Data Generation}
+
+This section discusses a use case illustrating how the aforementioned concepts integrate into a smart system.
+Consider the case in which a group of users conducts an experiment at large scale (a tightly coupled hero run on an HPC system) to gather new insight about small scale phenomenon.
+This experiment generates raw data of a huge volume (e.g., several Petabytes on existing systems).
+The user may know certain (diagnostic) post-processing that must be conducted on the data, but since the scientists work at the frontier of knowledge, it is usually unclear which features to look for and which data products to create.
+Over a period of several month scientists will analyze a subset of data (e.g., two regions of 10 GiB each) potentially using machine learning to identify the further analysis steps that shall be conducted on the full dataset.
+Once this is done, they register the analysis workflow and wait for all data products.
+
+The user specifies the workflow defining the characteristics of the processing and the data and include that the final data product must be retained for 10 years.
+The workflow also indicates that the data products are used in manual analysis and this may take several months.
+Note that users do not deal with namespace issues but provide scientifically relevant metadata for the raw data and the data products.
+At creation time of data products, these are semantically linked to the workflow and may be found when inspecting metadata for the created raw data.
+
+\medskip
+
+We envision the following support of the runtime for this use case:
+The workflow description gives the scheduler various options; firstly, the final data product must be accessible for 10 years; it may decide that it is cost-efficient to store the data on a tape archive, a subset of the data region should be stored for in-depth analysis and likewise a low-resolution version of the should be created.
+In another environment and depending on characteristics, the scheduler may have decided to not persist the huge data output but preserve a container for the application to allow recomputation -- but we will discuss the former case.
+
+An I/O-enabled resource manager will dispatch the hero run exclusively once there is enough storage capacity available on the archive storage system such as tape and I/O bandwidth is available.
+The system may schedule the post-processing, data reduction and subset creation, while  data transfer occurs in-transit on the client node or dedicated compute resources and picks a fast storage system for these products.
+That means a data-driven streaming workflow is applied to minimize reading of data during the post-processing workflow.
+The raw output is meanwhile directly stored on tape for archival purpose (e.g., as it must be kept for several years due to policies of the funding agency).
+The sample data is a replicate of a subset of the raw data's domain and stored for inspection on a storage system supporting good random I/O workloads.
+If a user inspects the metadata, one can see that fragments with a subset of data are stored on fast storage and the other parts on slow archival storage.
+Once the user registers the final workflow, i.e., requests data processing on the full dataset, the system has to process the vast amount of data on tape.
+
+Depending on the exact workflow, there are opportunities for the system:
+Thanks to liquid computing, parts of the workflow can be executed directly on tape drives and the network thinning out the amount of data that needs to be transferred while reading.
+Alternatively, we may retrieve the data from archive storage and create a copy on a faster storage system but -- since relevant parts of the workflow access pattern are known -- can reorganize the replicas of the fragment while data is fetched and, thus, optimize I/O for the subsequent accesses of the workflow.
+
+
+\paragraph{In-Situ Analysis}
+
+A user should be able any time to inspect and analyze data that is currently produced without changing the application code or even knowing a priori that this is an intent.
+Let us extend the previous case of the hero run; now the user may decide to visually analyze a subset of data and a low-resolution output of the data while the data is generated.
+We assume a node or visualization cluster has been allocated for this purpose.
+An NGI enabled visualization tool would be able to query the metadata and search for the experiment currently conducted.
+Then the region of interest is selected by the user.
+In the best case, some derived data products could be reused but it is expected that the tool submits new tasks (code snippets for liquid computing) to the runtime to perform data analysis and reduction.
+The system will create additional I/O streams and run the analysis codes in streaming mode as much as possible while it feeds the output to the application.
+This would allow us to perform filter operations on the process creating the raw data.
+If the volume of the produced data is too high, a workflow can be registered to create data products on the storage with good random I/O characteristics.
+The visualization is then constantly updated according to the NGI semantics.
 
 
 
