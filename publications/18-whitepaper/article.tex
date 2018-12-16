@@ -1,5 +1,5 @@
 \documentclass[a4paper, twocolumn]{article}
-\newcommand{\papertitle}{Whitepaper: Community Development of Next Generation Storage and Compute Interfaces}
+\newcommand{\papertitle}{Whitepaper: Community Development of Next Generation Storage and Compute Interfaces for Smart Workflow Processing}
 
 \usepackage[a4paper, margin=2cm]{geometry}
 
@@ -10,6 +10,7 @@
 \usepackage[colorlinks=true,urlcolor=red]{hyperref}
 \usepackage{url}
 \usepackage{cleveref}
+\usepackage{todonotes}
 
 \usepackage{multicol}
 \setlength{\columnsep}{1cm}
@@ -51,34 +52,92 @@
 \section*{Abstract}
 
 The efficient, convenient, and robust execution of data-driven workflows and enhanced data management are key for productivity in scientific computing and computer-aided RD\&E.
-Big data tools integrate compute and storage capabilities into a holistic solution demonstrating the benefit of tight integrating while the HPC community still optimizes the compute and storage components independently from each other, and, moreover, independently from the needs of end-to-end workflows from users that lead to the final insight.
-Utilizing a homogeneous storage and compute infrastructure efficiently is complex for experts even when staying within the data center.
-However, the execution of individual tasks from workflows may benefit from alternative hardware architectures and infrastructures -- the efficient management of data and compute capabilities in such a heterogeneous environment is an unresolved question.
-In this white paper, we describe the vision for the Next-Generation Interface (NGI) initiative that aims to tackle the aforementioned storage and compute challenges in a holistic.
-Within the NGI consortium, we fuse state-of-the-art concepts into a revolutionary approach by adding key features that increase opportunities for smarter scheduling of compute and storage in heterogeneous environments considering characteristics of workflows and data.
+Big data tools integrate compute and storage capabilities into a holistic solution demonstrating the benefit of tight integrating while the HPC community still optimizes the compute and storage components independently from each other, and, moreover, independently from the needs of end-to-end user workflows  that ultimately lead to insight.
+Even within a single data center, utilizing a homogeneous storage and compute infrastructure efficiently is complex for experts and needs a manual definition.
+The efficient management of data and compute capabilities in a heterogeneous environment, however, is an unresolved question as tthe execution of individual tasks from workflows may benefit from alternative hardware architectures and infrastructures.
+
+In this white paper, we describe the vision for the Next-Generation Interface (NGI) initiative that aims to tackle the aforementioned storage and compute challenges in a holistic approach.
+Within the NGI consortium, we fuse state-of-the-art concepts into a revolutionary interface by rethinking how data-driven I/O should be done.
 From the user perspective, NGI aims to provide an abstraction to data-driven processing and data management.
-From the system perspective, NGI aims to derive an execution plan that utilizes the available hardware and software infrastructure within and across data centers.
+The NGI interface ultimately will increase the opportunity of implementations for smarter scheduling of compute and storage in heterogeneous environments considering characteristics of workflows and data.
+From the system perspective, the vision of NGI aims to derive an execution plan that utilizes the available hardware and software infrastructure within and across data centers but also on small-scale systems.
 
 \section{Introduction}
 
-\textbf{IGNORE THIS INCOMPLETE SECTION FOR NOW.}
+High-Performance Computing harnesses the fastest hardware components to enable
+the execution of tightly coupled applications from science and industry.
+Typical use-cases cover the numerical simulation of physical systems or the analysis of large-scale observational data.
+While the hardware of HPC systems is on the bleeding edge, the software landscape of the infrastructure is lacking behind modern concepts found in domains like cloud computing.
+There are various reasons for the lack of innovation, e.g., the market capitalization is limited; many HPC applications have a life time of a decade; the goal in HPC is to get science done and not to have modern and user-friendly systems.
+Therefore, software developed to target the HPC market is rarely used outside data centers; while there is no reason to use developed applications outside this scope, software to aid developers or for managing HPC infrastructure suffers the same cause.
+Nowadays, HPC adapts infrastructure software from the enterprise and cloud market as much as possible; at best, adapting (stretching) already existing software packages to the needs of HPC.
 
-Zoo of approaches and interfaces.
-POSIX has been branded as dead.
-Evolution of POSIX?
+From the perspective of big data and cloud solutions, the state-of-the-art in the HPC software ecosystem is perceived as conservative and outdated at least; for example, HPC still uses batch processing and dedicates nodes to the execution of individual applications which were the first concepts implemented at the dawn of computing.
+Similar to writing code in assembler, often it is argued that HPC treats user-friendliness and manageability to obtain the best possible performance.
+However, as the complexity of systems increases and various alternative storage and compute technologies provide unique characteristics, it is barely possible to define optimal data-driven workflows using low-level constructs for the following reasons:
 
-Cloud definition of desired state and contracts.
+\begin{itemize}
+  \item Compute focus: HPC considers compute, storage, and network as separate resources and focuses on the compute aspects, e.g., I/O requires to retrieve/store data from a compute node.
+  While this provides a wonderful separation of concerns, it disregards the opportunity to process data closer to storage or between applications.
+  \item Complexity: a data-driven workflow is highly complex and may benefit from using a heterogeneous set of compute and storage technology at the same time.
+  Knowing the capabilities, interfaces, and performance characteristics of individual components is mandatory to make best use of them.
+  \item Portability: moving from one infrastructure to another or even when modifying the infrastructure requires to rethink and manually adapt the workflow as the characteristics of the overall environment changes.
+  \item Cost-efficiency: it is time consuming to utilize low-level constructs often only increasing performance slightly; also, the cost of labor must be taken into account.
+  From the perspective of scientists and engineers, the time-to-solution from experimental design to insight matters and not the cost-savings for the public data center.
+  \item Conservative users: users are reluctant to change their workflows for the reasons that older workflows are proven to be correct and it is labor intensive to manually adapt workflows.
+\end{itemize}
 
-HPC difficult to use.
+For these reasons, workflows are typically encoded manually and run suboptimally on HPC systems.
+Additionally, users of public data center services supply limited information about their experiments, typically the level of detail is like "I need X CPU hours and Y storage capacity" and they have not to proof their ability to use these systems efficiently.
+Still, the systems these workflows run on cost up to 100 million of dollars.
+Compare this to experiments conducted in physics like the Large Hadron Collider (LHC) at CERN or the Square Kilometer Array (SKA); execution of complex experiments may need years of planning involving the scientists.
+While it is important to keep some freedom to conduct ad-hoc experiments, we raise the question what could be achieved by systems and operators knowing workflows in more detail.
+We argue that knowledge about workflow execution and overall experimental design helps to
+optimize execution of workflows and additionally increase the performance, throughput and  cost-efficiency of the environments, therewith, providing an incentive to users and data-centers that cannot be neglected.
+
+\medskip
+
+With the Next Generation Interfaces initiative, we aim to define a high-level interfaces that, firstly, meets the needs of users and data centers, and, secondly, that allows implementations to exploit the capabilities of current and future storage and compute landscapes.
+The remainder of this article is structured as follows: \\
+\todo[inline]{TODO}
+
+In \Cref{sec:background}, we provide relevant background information.
+\Cref{sec:ngiVision}
+\Cref{sec:ngWorkflows}
+\Cref{sec:community}
+\Cref{sec:conclusions}
 
 
-Indeed many research prototypes address subproblems
-* But not all aspects together
-* Competing approaches; the standardization we describe here does not compete!
+\section{Background}
+\label{sec:background}
+This section provides an introduction to workflows, the mandatory steps to encode and setup tasks and describe data, and the cause for heterogeneous infrastructure.
 
-In this paper, we purposely do not mention too many of the ongoing RD\&E in storage and compute.
+%Kubernetes
 
-\subsection{Heterogeneous Systems}
+\subsection{Workflow Description}
+
+To solve a computational problem, we can consider to describe the necessary steps from the start to the insight as a workflow.
+Such a workflow description must comprise of the individual data processing steps, the expected  products, together with dependencies between the steps and to input.
+The nodes can be annotated with characteristics of the individual steps;
+data can be annotated with metadata describing its content, the expected data life cycle information, e.g., the value of data and how long should it be kept; tasks can be annotated with the information needed to start processing or with performance models that bound the  expectations for resources (time, memory, storage capacity).
+
+An example execution of a workflow is illustrated in \Cref{fig:workflow} as a graph (we have not shown characteristics and annotations).
+Arrows indicate dependencies between nodes that represent tasks and data.
+In the example, Task\,1 needs two datasets to perform its work, it directly communicates with Task\,2 and produces Product\,1.
+Most of the workflow can run automatically except the manual quality control of the products and the final data usage of Product\,3 at the end.
+The last step represents the typical uncertainty of data reuse, when this workflow is created it is unclear how Product\,3 will be used further, it is apparent that it will be.
+Further workflows that use the data may be created similarly and use the product as input.
+
+
+\begin{figure}[b]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{workflow}
+  \caption{Example High-Level Workflow without Characteristics}
+  \label{fig:workflow}
+\end{figure}
+
+
+\subsection{Heterogeneous Infrastructure}
 
 The variety of tasks executed by a single workflow may benefit from a heterogeneous storage and compute infrastructure and potentially even span multiple locations.
 \Cref{fig:heterogeneous} shows such an environment but focuses on the computation and storage.
@@ -104,42 +163,8 @@ Therefore, users must be able to express their workflows in an abstract fashion 
 \end{figure}
 
 
-
-\subsection{Experimental Planning}
-
-Knowledge about workflow execution and overall experimental design can help to
-optimize execution of individual workflows and processing environments.
-From the perspective of scientists and engineers, the time-to-solution from experimental design to insight matters.
-At the moment, users of public data center services supply limited information about their experiments, typically the level of detail is like "I need X CPU hours and Y storage capacity" and they have not to proof their ability to use these systems efficiently.
-Still, the systems these workflows run on cost up to 100 million of dollars.
-Compare this to experiments conducted in physics like the Large Hadron Collider (LHC) at CERN or the Square Kilometer Array (SKA); execution of complex experiments may need years of planning involving the scientists.
-While it is important to keep some freedom to conduct ad-hoc experiments, we raise the question what could be achieved by systems and operators knowing workflows in more detail.
-%Kubernetes
-
-\subsubsection{Example Workflow}
-
-The execution of a workflow is illustrated in \Cref{fig:workflow}.
-Arrows indicate dependencies between tasks and data.
-Note that we expect that the nodes are annotated with characteristics of the workflow;
-data can be annotated with metadata describing its content, the expected data life cycle information, e.g., the value of data and how long should it be kept; tasks can be annotated with the information to run them and runtime.
-
-In the example, Task\,1 needs two datasets to perform its work, it directly communicates with Task\,2 and produces Product\,1.
-Most of the workflow can run automatically except the manual quality control of the products and the final data usage of Product\,3 at the end.
-The last step represents the typical uncertainty of data reuse, when this workflow is created it is unclear how Product\,3 will be used further, it is apparent that it will be.
-Further workflows that use the data may be created similarly and use the product as input.
-
-
-\begin{figure}[b]
-  \centering
-  \includegraphics[width=0.75\columnwidth]{workflow}
-  \caption{Example High-Level Workflow without Characteristics}
-  \label{fig:workflow}
-\end{figure}
-
-
-
-
 \section{NGI Vision}
+\label{sec:ngiVision}
 
 Our vision for Next Generation Interfaces is a new approach for data management and data-driven computation.
 %\paragraph{Data Model}
@@ -242,6 +267,7 @@ Adding new capabilities or resources to the system will allow the scheduler to u
 
 
 \section{Next Generation Workflows}
+\label{sec:ngWorkflows}
 
 This section illustrates how workflows using NGI could be run and optimized by a smart runtime implementation of NGI.
 
@@ -337,6 +363,7 @@ The visualization is then constantly updated according to the NGI semantics.
 
 
 \section{Community Strategy}
+\label{sec:community}
 
 We are in the process to establish the NGI Forum that curates the development of the APIs.
 The process will share the idea with the successful MPI Forum.
@@ -358,6 +385,18 @@ We expect that vendors and researchers will embrace the open ecosystem similarly
 \end{figure}
 
 \section{Conclusions}
+\label{sec:conclusions}
+
+
+Cloud definition of desired state and contracts.
+
+Indeed many research prototypes address subproblems
+* But not all aspects together
+* Competing approaches; the standardization we describe here does not compete!
+
+In this paper, we purposely do not mention too many of the ongoing RD\&E in storage and compute.
+
+
 
 
 To wrap up, NGI provides a high-level view on data and processing on heterogeneous platforms while shielding the user from execution details.
