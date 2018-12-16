@@ -101,16 +101,18 @@ With the Next Generation Interfaces initiative, we aim to define a high-level in
 The remainder of this article is structured as follows: \\
 \todo[inline]{TODO}
 
-In \Cref{sec:background}, we provide relevant background information.
+In \Cref{sec:background}, we provide relevant background information for workflows.
+\Cref{sec:challenges}
 \Cref{sec:ngiVision}
 \Cref{sec:ngWorkflows}
 \Cref{sec:community}
 \Cref{sec:conclusions}
 
 
-\section{Background}
+\section{Workflows}
 \label{sec:background}
-This section provides an introduction to workflows, the mandatory steps to encode and setup tasks and describe data, and the cause for heterogeneous infrastructure.
+This section provides an introduction to workflows that solve computational problems, the mandatory steps to encode and setup tasks and describe data, and the relevance of  heterogeneous infrastructure to run workflows.
+We focus on high-level considerations that illustrate mandatory concepts.
 
 %Kubernetes
 
@@ -128,6 +130,8 @@ Most of the workflow can run automatically except the manual quality control of 
 The last step represents the typical uncertainty of data reuse, when this workflow is created it is unclear how Product\,3 will be used further, it is apparent that it will be.
 Further workflows that use the data may be created similarly and use the product as input.
 
+Note that a realistic workflow will be much more complex and involves not a single parallel job execution but many to generate a robust answer to the research question.
+
 
 \begin{figure}[b]
   \centering
@@ -136,6 +140,21 @@ Further workflows that use the data may be created similarly and use the product
   \label{fig:workflow}
 \end{figure}
 
+\subsection{Task Definition}
+
+The high-level interaction of a task with its dependencies is generally specified in the workflow.
+A compute task is encoded in a programming language by a developer\footnote{We often treat developer and HPC user as synonyms as a fraction of HPC users are developers for parallel applications to some extent.}.
+A team of developers encodes the algorithm that solves the problem -- e.g., in many cases,  scientists that generate a numerical simulation implement the model programmaticially.
+Often they use existing libraries that provide a piece of functionality or infrastructure.
+In the design phase of the program, a parallel programming paradigm and suitable data structures that allow efficient data processing are chosen.
+In the world of parallel computing, the developer must also consider strategies to parallelize the code and data processing; this often involves to use APIs and runtime systems that allow the efficient usage of supercomputers.
+
+While most parts of the algorithm can be a tightly coupled simulation, as part of the algorithm, input data must be fetched and data products are generated which are processes that are executed outside of the main simulation.
+Typically, before the input data can be used some kind of preprocessing must be applied, similarly, in the output several known post-processing steps may be applied.
+Also, the programmer is responsible for making the optimal decisions on how to map data structures from memory to I/O calls and place these files onto storage systems.
+
+We consider that pre/post-processing are part of the data-driven scope of NGI.
+Indeed, we claim the programmer should be able to define the input/output on an abstract fashion and connect processing steps as part of the general workflow.
 
 \subsection{Heterogeneous Infrastructure}
 
@@ -150,17 +169,87 @@ Also, the lines between cloud computing and HPC are blurry, attempts are made to
 Consider a simple scenario where sensor data captured is pre-processed (cleaned) locally, then enriched with an additional data source in a small-scale HPC facility or by using fog computing, then transferred to a data center that performs the number crunching and generates data products.
 These data products may be made available on cloud storage to customers for individual processing.
 
-Utilizing the compute and storage characteristics of such a heterogeneous environment is challenging.
-Manual and hard-coded workflows cannot handle changes in the environment and are error prone.
-Therefore, users must be able to express their workflows in an abstract fashion that allows the system to generate (near-)optimal execution plans and monitor their execution.
-
-
 \begin{figure}[b]
   \centering
   \includegraphics[width=\columnwidth]{system}
   \caption{Example Heterogeneous HPC Landscape}
   \label{fig:heterogeneous}
 \end{figure}
+
+\section{Challenges and Limitations}
+\label{sec:challenges}
+The current HPC environment faces several challenges and limitations in respect to the execution of data-driven workflows.
+
+
+
+\paragraph{Low-level interfaces:}
+HPC data management and data-flow processing utilizes low-level interfaces.
+Storage relies still on traditional file system objects of directories and files -- provided by the POSIX interface or by object storage.
+Underlying storage systems are receiving or delivering streams of bytes, and it cannot make any intelligent decisions about how to optimize data layout for performance, or resiliency.
+It deals with data blocks and files and requires instructions on how to select and control available optimization strategies.
+
+In practice, applications build up layers so that the application itself is usually working with the data mediated by a library which provides application specific semantics --- but at the lowest level such a library is limited by the underlying storage APIs (POSIX).
+This has performance implications due to synchronization in distributed environments but also severely limits the ability of the underlying storage systems to optimize I/O operations.
+
+Data-driven processing suffers similarly, from the high-level view of processes that are executed on a given compute node.
+
+
+\paragraph{Explicit workflows:}
+Typically, as part of shell scripts, users explicitly encode data processing workflows as a sequence of steps consisting of input, compute, and output.
+The compute-intense parts (jobs) and their dependencies are managed by a cluster resource manager that dispatches them.
+These loosely coupled workflows require that intermediate results are stored on persistent storage to be used by the next task.
+Data transfer, however, needs a dominant fraction of energy compared to computation favoring offloading of computation to storage.
+
+
+\paragraph{Suboptimal Storage Tiering:}
+Organizing the data placement on storage tiers is typically performed manually by the developer/user or via policies.
+This leads to suboptimal optimizations, is tedious and error prone.
+
+Manual tiering requires the user or application to control the data placement, i.e., storing data (typically in form of files) on a particular storage system and typically moving data between storage by using scripts.
+One limitation here is that decisions about how data structures are mapped and packaged into files are made once by the producing application, and cannot be changed without manual intervention by a downstream application.
+
+A policy system (e.g. burst buffer) aims to simplify the data movement for the user but  typically migrates objects in the coarse granularity of files.
+However, the semantical information that can be used by a policy system to make decisions is limited, e.g.,  data location, file extension, age of the file.
+
+Any hard-coded decision has significant implications for performance of both applications and systems because the optimal choices about file size and content may be very different for the data production and any subsequent data analysis phase.
+In any case, data migration needs resources on the source and the target storage system to copy data.
+Thus, it is preferable to direct data to locations where it can be stored and directly used by subsequent workflows; at best coupling the data source producing data with a data consumer to prevent storing intermediate products on persistent storage.
+
+\paragraph{Task and data equality:}
+
+All tasks and data products are handled identically by an HPC system meaning there is no differentiation between individual jobs and data products.
+This is problematic as different use cases may not only differ in priority and deadline but as the speed they proceed depends on the critical path of the execution.
+
+Fair enough, batch systems understand a priority for jobs.
+However, once a set of nodes is allocated explicitly to a compute job, the job is run exclusively and may utilize shared resources such as storage systems and network as any other job. %-- quality of service features available in hardware are rarely used
+
+This is more sever for data products: a storage system provides a single level of performance and resilience and performance for all use cases.
+Theoretically, different fault-tolerance and performance policies can be realized with different storage systems and using management policies.
+However, these policies would be coarse-grained and would not account for the priority of the workflow and most importantly the value of data;
+the value of data depends on aspects like costs to reproduce the data (can it be re-produced easily), the type of the experiment (test run, production run) and runtime constraints for the overall and potential crucial workflow.
+While value and priority should influence fault-tolerance strategies and imply quality of service for performance and availability, in practice this is not the case as the storage just sees blocks and files.
+
+\paragraph{Manual optimization:}
+Utilizing the compute and storage characteristics of a heterogeneous environment as depicted in \Cref{fig:heterogeneous} is challenging at least.
+The optimization of a single parallel job already is quite challenging.
+To make optimal use of available features, programmers and users are forced to think about technological aspects and terms, e.g., setting low-level MPI hints for file striping, while they understand their workflow.
+Similarly, an efficient data placement is complex.
+
+\medskip
+
+An explicit workflows combined with manual optimization is the root-cause of subsequent problems.
+
+\paragraph{Access pattern intransparency:}
+As access patterns are primarily implicitly defined in application code and embedded in workflows, the understanding and debugability of behavior is limited.
+Firstly, there are many alternatives ways of programming data-intensive computation to achieve the identical data products.
+Secondly, many storage and compute interfaces are low-level.
+Thus, data centers have often limited insight into the access patterns as well.
+Moreover, some users are abusing the storage system in non-obvious ways, for example to exchange notifications.
+Together with the possibility to observe access patterns at low-level, these issues lead to the situation that understanding and improving of access patterns become difficult.
+Limited insight into behavior leads to suboptimal tuning.
+
+Manual and hard-coded workflows cannot handle changes in the environment and are error prone.
+Therefore, users must be able to express their workflows in an abstract fashion that allows the system to generate (near-)optimal execution plans and monitor their execution.
 
 
 \section{NGI Vision}
