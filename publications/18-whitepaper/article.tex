@@ -33,10 +33,11 @@
 
 \title{\papertitle}
 
-\author{Julian M. Kunkel \\
+\author{Julian M. Kunkel 
   \textit{University of Reading}
 	\and
-  A
+  Chris Hoffman
+  \textit{National Center for Atmospheric Research}
   \and
   B
   \and
@@ -449,7 +450,25 @@ This would allow us to perform filter operations on the process creating the raw
 If the volume of the produced data is too high, a workflow can be registered to create data products on the storage with good random I/O characteristics.
 The visualization is then constantly updated according to the NGI semantics.
 
+\subsection{Capacity Data Lifecycle Workflow}
+The available storage solutions have changed over the years. One solution may work for a class of use cases, but not another class. The resulting environment is a heterogeneous hierchy of storage tiers. The tiers of data storage have varying levels of performance and different economic models. The trade-offs of these characteristics drives use cases. The need for a middleware translation layer is needed with various backend storage solutions whether Commercial off the shelf (COTS) solutions supplied or open source software (OSS) is crucial in an HPC ecosystem. 
 
+Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts a user may not be aware of proper use of a storage system. For example, a user may store a data set in HPSS, which is commonly use for a long term archival solution. This use then frequently recalls data from this solution. A more optimized use case would be to use Campaign Storage for warm active data sets. In some cases, workflow may not be known until a project progresses. 
+
+Another unknown is future capabilities of a storage system. This also introduces significant effort in eduction, workflow optimization, and data stewardship. This can cause extra effort of system administrators and users alike. This future solution will address these challenges by giving a user more flexibility via workflow improvements. A generic overview of this workflow is given in \Cref{fig:dataLifecycle}
+
+\begin{figure}[b]
+  \includegraphics[width=0.75\columnwidth]{datalifecycle-workflow}
+  \caption{Future Data Lifecycle Workflows}
+  \label{fig:dataLifecycle}
+\end{figure}
+
+\subsubsection{Execution of the data lifecycle workflow}
+First data sources are read and written from an HPC supercomputer. (S1) shows I/O between a compute and primay data store, that may be POSIX or another data store. This storage has high performance in bandwidth, latency and I/O operations. This data will be copied off this location via a data movement tool. (S2) is movement between the fast storage tier using Data Movers or File Transfer Agents (FTA). This FTA then on-the-fly tranlates from the native interface of one data store to the NGSI interface. This is depicted in (S2) and (S3). An additional layer of translation will occur at (S4), which translates the data to various storage backends. These backends are fully pluggable and customizable solutions. (M1) is Data Management and Machine Learning mechanisms or user defined migration policies and rules. (M1) works with the data movers to migrate data back and forth without manual user intervention. A user is able to read, write and delete immutable data and then allow for various data retention policies.
+
+
+\paragraph{In-Situ Analysis}
+The user will define data policies and the system administrator will devise ML techniques using empirical data models for optimized management and placement. The result is to use each storage tier in the intended use case with minimal effort of user. For example, a large dataset of hundreds of TiBs was put on a spinning disk archive (Campaign Storage), but only 10 GiB was accessed. A potential operation would be that through data policies migrate some, or most of it to a tape based system.
 
 \section{Community Strategy}
 \label{sec:community}
