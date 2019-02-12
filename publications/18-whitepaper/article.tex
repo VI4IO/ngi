@@ -33,13 +33,14 @@
 
 \title{\papertitle}
 
-\author{Julian M. Kunkel 
+\author{Julian M. Kunkel
   \textit{University of Reading}
 	\and
   Chris Hoffman
   \textit{National Center for Atmospheric Research}
   \and
-  B
+  Andy Poling
+  \textit{Kove}
   \and
   C
 }
@@ -451,9 +452,9 @@ If the volume of the produced data is too high, a workflow can be registered to 
 The visualization is then constantly updated according to the NGI semantics.
 
 \subsection{Capacity Data Lifecycle Workflow}
-The available storage solutions have changed over the years. One solution may work for a class of use cases, but not another class. The resulting environment is a heterogeneous hierchy of storage tiers. The tiers of data storage have varying levels of performance and different economic models. The trade-offs of these characteristics drives use cases. The need for a middleware translation layer is needed with various backend storage solutions whether Commercial off the shelf (COTS) solutions supplied or open source software (OSS) is crucial in an HPC ecosystem. 
+The available storage solutions have changed over the years. One solution may work for a class of use cases, but not another class. The resulting environment is a heterogeneous hierchy of storage tiers. The tiers of data storage have varying levels of performance and different economic models. The trade-offs of these characteristics drives use cases. The need for a middleware translation layer is needed with various backend storage solutions whether Commercial off the shelf (COTS) solutions supplied or open source software (OSS) is crucial in an HPC ecosystem.
 
-Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts a user may not be aware of proper use of a storage system. For example, a user may store a data set in HPSS, which is commonly use for a long term archival solution. This use then frequently recalls data from this solution. A more optimized use case would be to use Campaign Storage for warm active data sets. In some cases, workflow may not be known until a project progresses. 
+Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts a user may not be aware of proper use of a storage system. For example, a user may store a data set in HPSS, which is commonly use for a long term archival solution. This use then frequently recalls data from this solution. A more optimized use case would be to use Campaign Storage for warm active data sets. In some cases, workflow may not be known until a project progresses.
 
 Another unknown is future capabilities of a storage system. This also introduces significant effort in eduction, workflow optimization, and data stewardship. This can cause extra effort of system administrators and users alike. This future solution will address these challenges by giving a user more flexibility via workflow improvements. A generic overview of this workflow is given in \Cref{fig:dataLifecycle}
 
