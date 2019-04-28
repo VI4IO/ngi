@@ -42,7 +42,7 @@
   Andy Poling
   \textit{Kove}
   \and
-  C
+  Jay Lofstead \textit{Sandia National Laboratories}
 }
 \date{\today}
 
@@ -52,14 +52,19 @@
 \thispagestyle{fancy}
 
 \section*{Abstract}
+The efficient, convenient, and robust execution of data-driven workflows and enhanced data management are key for productivity in scientific computing and computer-aided Research Development and Engineering (RD\&E).
+Traditionally in HPC the concerns of storage and compute are separated and optimized independently from each other, and, moreover, independently from the needs of end-to-end user workflows that ultimately lead to insight.
+While there are good reasons for this strategy, there are workflows that run also efficiently with alternative organizations.
+For example, Big data tools integrate compute and storage capabilities into a holistic solution demonstrating the benefit of tight integrating for data-driven workflows.
+As workflows become increasingly complex and blend beyond data centers while at the same time storage hierarchies becomes deeper, the community investigates means to re-organize storage access to fully utilize such environments.
 
-The efficient, convenient, and robust execution of data-driven workflows and enhanced data management are key for productivity in scientific computing and computer-aided RD\&E.
-Big data tools integrate compute and storage capabilities into a holistic solution demonstrating the benefit of tight integrating while the HPC community still optimizes the compute and storage components independently from each other, and, moreover, independently from the needs of end-to-end user workflows  that ultimately lead to insight.
-Even within a single data center, utilizing a homogeneous storage and compute infrastructure efficiently is complex for experts and needs a manual definition.
-The efficient management of data and compute capabilities in a heterogeneous environment, however, is an unresolved question as tthe execution of individual tasks from workflows may benefit from alternative hardware architectures and infrastructures.
+
+Even within a single data center, utilizing homogeneous storage and compute infrastructure efficiently is complex for experts and needs a manual definition.
+The efficient management of data and compute capabilities in a heterogeneous environment, however, is an unresolved question as the execution of individual tasks from workflows may benefit from alternative hardware architectures and infrastructures.
 
 In this white paper, we describe the vision for the Next-Generation Interface (NGI) initiative that aims to tackle the aforementioned storage and compute challenges in a holistic approach.
 Within the NGI consortium, we fuse state-of-the-art concepts into a revolutionary interface by rethinking how data-driven I/O should be done.
+Basically, we believe workflows composed of data, compute and communication intensive tasks should drive the interfaces and hardware configurations to best support these programming models.
 From the user perspective, NGI aims to provide an abstraction to data-driven processing and data management.
 The NGI interface ultimately will increase the opportunity of implementations for smarter scheduling of compute and storage in heterogeneous environments considering characteristics of workflows and data.
 From the system perspective, the vision of NGI aims to derive an execution plan that utilizes the available hardware and software infrastructure within and across data centers but also on small-scale systems.
@@ -70,7 +75,9 @@ High-Performance Computing harnesses the fastest hardware components to enable
 the execution of tightly coupled applications from science and industry.
 Typical use-cases cover the numerical simulation of physical systems or the analysis of large-scale observational data.
 While the hardware of HPC systems is on the bleeding edge, the software landscape of the infrastructure is lacking behind modern concepts found in domains like cloud computing.
-There are various reasons for the lack of innovation, e.g., the market capitalization is limited; many HPC applications have a life time of a decade; the goal in HPC is to get science done and not to have modern and user-friendly systems.
+There are various reasons for the lack of innovation, e.g., the market capitalization is limited; many HPC applications have a life time of sometimes several decades\footnote{For example, CTH at Sandia is more than 30 years old, but it has evolved over the years as hardware has changed.
+It is not uncommon that codes take 10 years to write and receive a first optimized setup.
+Then they run for another 30 years with constant evolution based on platform changes and functionality expansions.}; the goal in HPC is to get science done and not to have modern and user-friendly systems.
 Therefore, software developed to target the HPC market is rarely used outside data centers; while there is no reason to use developed applications outside this scope, software to aid developers or for managing HPC infrastructure suffers the same cause.
 Nowadays, HPC adapts infrastructure software from the enterprise and cloud market as much as possible; at best, adapting (stretching) already existing software packages to the needs of HPC.
 
@@ -185,6 +192,7 @@ The current HPC environment faces several challenges and limitations in respect 
 
 
 \paragraph{Low-level interfaces:}
+In a nutshell, a stream of bytes isn't a workable data model.
 HPC data management and data-flow processing utilizes low-level interfaces.
 Storage relies still on traditional file system objects of directories and files -- provided by the POSIX interface or by object storage.
 Underlying storage systems are receiving or delivering streams of bytes, and it cannot make any intelligent decisions about how to optimize data layout for performance, or resiliency.
