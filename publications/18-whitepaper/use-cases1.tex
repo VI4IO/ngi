@@ -1,6 +1,6 @@
 \documentclass[a4paper, twocolumn]{article}
 \newcommand{\pversion}{0.5}
-\newcommand{\papertitle}{Whitepaper: Smarter Workflow Processing in Climate/Weather}
+\newcommand{\papertitle}{NGI Use Cases: Smarter Workflow Processing in Climate/Weather}
 
 \usepackage[a4paper, margin=2cm]{geometry}
 
@@ -53,6 +53,7 @@ As workflows become increasingly complex and blend beyond data centers while at 
 
 In the NGI Forum, we believe workflows composed of data, compute and communication intensive tasks should drive the interfaces and hardware configurations to best support these programming models.
 In this whitepaper, we describe how workflows for climate and weather could benefit from higher-level abstraction for data flows.
+The document serves the purpose to motivate subsequent NGI activity, the implementation of described features will likely differ from the sketched solutions.
 
 \section{Next Generation Workflows}
 \label{sec:ngWorkflows}
@@ -67,7 +68,8 @@ A generic overview of the workflows for climate and weather is given in \Cref{fi
 
 Prediction of the weather in the near future (hours, known as nowcasting; days or weeks -- seasonal) is performed by executing workflows consisting of several processing steps. The execution of a workflow engine that orchestrates the individual execution steps is not explicitly included in the workflow description.
 
-For weather prediction, these workflows are schedules on a regular basis, e.g., a prediction is performed every 4 hours. The prediction is based on observational data and outputs data products that are processed further and distributed to customers.
+For weather prediction, these workflows are schedules on a regular basis, e.g., a prediction is performed every four hours.
+The prediction is based on observational data and outputs data products that are processed further and distributed to customers.
 
 \subsubsection{Execution of a weather workflow}
 
@@ -148,12 +150,25 @@ This would allow us to perform filter operations on the process creating the raw
 If the volume of the produced data is too high, a workflow can be registered to create data products on the storage with good random I/O characteristics.
 The visualization is then constantly updated according to the NGI semantics.
 
-\subsection{Capacity Data Lifecycle Workflow}
-The available storage solutions have changed over the years. One solution may work for a class of use cases, but not another class. The resulting environment is a heterogeneous hierchy of storage tiers. The tiers of data storage have varying levels of performance and different economic models. The trade-offs of these characteristics drives use cases. The need for a middleware translation layer is needed with various backend storage solutions whether Commercial off the shelf (COTS) solutions supplied or open source software (OSS) is crucial in an HPC ecosystem.
+\section{Data Archival}
+This scenario is a more conservative perspective utilizing NGI to replace data archival interfaces.
+It also shows an incremental strategy to improve existing HPC environments.
 
-Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts a user may not be aware of proper use of a storage system. For example, a user may store a data set in HPSS, which is commonly use for a long term archival solution. This use then frequently recalls data from this solution. A more optimized use case would be to use Campaign Storage for warm active data sets. In some cases, workflow may not be known until a project progresses.
+\subsection{Introduction}
+The heterogeneous hierarchy of storage tiers have varying levels of performance and different economic models.
+Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts, a user may not be aware of proper use of a storage system.
+For example, a user may store a data set in HPSS, which is commonly used for a long term archival solution.
+This user then frequently recalls data from this solution.
+A more optimized use case would be to use Campaign Storage for warm active data sets.
+In some cases, workflow may not be known until a project progresses.
 
-Another unknown is future capabilities of a storage system. This also introduces significant effort in eduction, workflow optimization, and data stewardship. This can cause extra effort of system administrators and users alike. This future solution will address these challenges by giving a user more flexibility via workflow improvements. A generic overview of this workflow is given in \Cref{fig:dataLifecycle}
+Another unknown is future capabilities of a storage system.
+This also introduces significant effort in education, workflow optimization, and data stewardship.
+This can cause extra effort of system administrators and users alike.
+This future solution will address these challenges by giving a user more flexibility via workflow improvements.
+We conclude that crucially in the HPC ecosystem, a middleware translation layer is needed which supports various backend storage solutions whether Commercial-off-the-shelf (COTS) solutions supplied or open source software (OSS).
+This could be NGI.
+A generic overview of this workflow is given in \Cref{fig:dataLifecycle}
 
 \begin{figure}[b]
   \includegraphics[width=0.75\columnwidth]{datalifecycle-workflow}
@@ -161,12 +176,31 @@ Another unknown is future capabilities of a storage system. This also introduces
   \label{fig:dataLifecycle}
 \end{figure}
 
-\subsubsection{Execution of the data lifecycle workflow}
-First data sources are read and written from an HPC supercomputer. (S1) shows I/O between a compute and primay data store, that may be POSIX or another data store. This storage has high performance in bandwidth, latency and I/O operations. This data will be copied off this location via a data movement tool. (S2) is movement between the fast storage tier using Data Movers or File Transfer Agents (FTA). This FTA then on-the-fly tranlates from the native interface of one data store to the NGSI interface. This is depicted in (S2) and (S3). An additional layer of translation will occur at (S4), which translates the data to various storage backends. These backends are fully pluggable and customizable solutions. (M1) is Data Management and Machine Learning mechanisms or user defined migration policies and rules. (M1) works with the data movers to migrate data back and forth without manual user intervention. A user is able to read, write and delete immutable data and then allow for various data retention policies.
+\subsubsection{Execution of the workflow}
+
+First data sources are read and written from/to an HPC supercomputer.
+(S1) shows I/O between a compute and primary data store, that may be POSIX or another interface.
+This storage has high-performance characteristics for bandwidth, latency and I/O operations.
+This data will be selected by the user for archival or migration off this location via a data movement tool (this is depicted in S2).
+Instead of using proprietary interfaces, NGI could be used.
+The respective tools translate on the fly from the native interface of one data store to the NGI interface.
+NGI is in charge to make the decision how to layout the data on one or multiple storage backends (S3).
+These backends are fully pluggable and customizable solutions.
+Under the hood a backend -- such as tape -- may need additional Data Movers or File Transfer Agents (FTA) to perform the work efficiently; we will not discuss this further in this paper.
+(M1) is the smart data management powered by Machine Learning that also takes user-defined migration policies and rules into account.
+(M1) works with the data movers to migrate data back and forth without manual user intervention.
+A user is able to read, write and delete immutable data and then allow for various data retention policies.
 
 
-\paragraph{In-Situ Analysis}
-The user will define data policies and the system administrator will devise ML techniques using empirical data models for optimized management and placement. The result is to use each storage tier in the intended use case with minimal effort of user. For example, a large dataset of hundreds of TiBs was put on a spinning disk archive (Campaign Storage), but only 10 GiB was accessed. A potential operation would be that through data policies migrate some, or most of it to a tape based system.
+\paragraph{Optimized Data Placement}
+The user will have to define the relevant properties of the data (such as how long that data shall be stored) and workflow and the system administrator provides the definition of the extensible storage landscape.
+NGI will utilize machine learning techniques based on empirical data models for optimized management and placement of the data itself.
+The result is to use each storage tier in the intended use case with minimal effort of user.
+
+For example, assume a large dataset of hundreds of TiBs was put on a spinning disk archive (Campaign Storage), but only a specific variable with 10 GiB of data is accessed.
+A potential operation would be that through data policies migrate other variables, or most of it to a tape based system.
+Another strategy would be to store the first timestep(s) on disk while storing the remainder on tape.
+This allows users to work already with the data while the remaining parts are retrieved in the background.
 
 \section{Conclusions}
 
