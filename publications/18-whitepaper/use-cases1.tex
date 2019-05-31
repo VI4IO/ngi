@@ -151,18 +151,37 @@ If the volume of the produced data is too high, a workflow can be registered to 
 The visualization is then constantly updated according to the NGI semantics.
 
 \section{Data Archival}
-This scenario is a more conservative perspective utilizing NGI to replace data archival interfaces.
+This scenario is a more conservative perspective utilizing NGI to replace data archival interfaces. 
+This section is not meant to replace current archival systems, but instead of introduce capabilities that may not be present.
 It also shows an incremental strategy to improve existing HPC environments.
 
 \subsection{Introduction}
-The heterogeneous hierarchy of storage tiers have varying levels of performance and different economic models.
-Various data retention boundaries may not align with an HPC storage system’s lifetime. Due to constantly changing use cases and generational technology shifts, a user may not be aware of proper use of a storage system.
+The archive strategy at many centers has been to have a large monolithic storage based system. 
+These systems locked into vendor hardware and vendor software. 
+There are typically minimal amount of additonal software that can be used with certain hardware. 
+Features can be requested and implemented based on critical mass of user need or through non-recurring-engineering (NRE) funding. 
+NRE is typically not available to many center besides the largest or the most well funded. 
+HPC Centers may have a unique feature or capability that is wanted and while a request for enhancement is submitted, it may take a while to get critical mass, if at all.
+Other features that may work with the underlying technology such as adding a new configuration or hardware component must be pre-approval from vendor before being integrated into the storage ecosystem.
+This use case can work in a community driven model to add capabilities and features due to the FOSS nature.
+
+Introduction of many physical tiers becomes troublesome for users to pre-migrate their data for usage or for archival purposes.
+Physical tiers can be part of a namespace with many physical tiers into a single logical tier or an environment may have many logical tiers that are tied to their physical tier
+This section will address ways to combine the many types of physical tiers into appropriate logical tiers, thus allows physical tiers have multiple uses.
+
+The heterogeneous hierarchy of storage tiers have varying levels of performance and different economic models. 
+For example, a burst buffer tier has been introduced for high IOPs and throughput to accelerate codes.
+This tier is much smaller in capacity due to the cost of flash.
+Various data retention boundaries may not align with an HPC storage system’s lifetime. 
+This can be apparent when a storage system is years old and a new project spanning a decade.
+Due to constantly changing use cases and generational technology shifts, a user may not be aware of proper use of a storage system.
 For example, a user may store a data set in HPSS, which is commonly used for a long term archival solution.
 This user then frequently recalls data from this solution.
-A more optimized use case would be to use Campaign Storage for warm active data sets.
+A more optimized use case would be to use a near-line solution, such as Campaign Storage for warm active data sets.
 In some cases, workflow may not be known until a project progresses.
 
-Another unknown is future capabilities of a storage system.
+Another unknown is future capabilities and layout of a storage system.
+This storage system could introduce a new storage tier or combine multiple tiers into fewer logical tiers.
 This also introduces significant effort in education, workflow optimization, and data stewardship.
 This can cause extra effort of system administrators and users alike.
 This future solution will address these challenges by giving a user more flexibility via workflow improvements.
@@ -196,14 +215,34 @@ A user is able to read, write and delete immutable data and then allow for vario
 The user will have to define the relevant properties of the data (such as how long that data shall be stored) and workflow and the system administrator provides the definition of the extensible storage landscape.
 NGI will utilize machine learning techniques based on empirical data models for optimized management and placement of the data itself.
 The result is to use each storage tier in the intended use case with minimal effort of user.
+These storage tier can be tape or spinning disk media.
 
 For example, assume a large dataset of hundreds of TiBs was put on a spinning disk archive (Campaign Storage), but only a specific variable with 10 GiB of data is accessed.
-A potential operation would be that through data policies migrate other variables, or most of it to a tape based system.
+A potential operation would be that through data policies migrate other variables, that are unused, to a tape based system.
+This will allow for more efficient uses of economics of storage media based on the temperature of the variables.
 Another strategy would be to store the first timestep(s) on disk while storing the remainder on tape.
 This allows users to work already with the data while the remaining parts are retrieved in the background.
 
-\section{Conclusions}
 
+\paragraph{Increased Data Capability Momentum}
+Data archives store a copy of data for long term storage and reference.
+In many cases, the copy stored through the data archive interface is the only copy.
+Users, teams and organizations through policy are required or recommended to make contigent plans of multiple copies of business critical data.
+These procedures are audited and require many hours of compliance checking in addition to ensuring an additional copy.
+Additonal copies also introduce failure of processes to other storage systems.
+The additonal backups may not be cost effective being on multiple systems in full copy.
+In this section we will discuss a system that addresses this data resilience issue through replicas (2x, 3x multiplier) and using erasure coded schema (1.2x, 1.4x mulitplier) across storge failure domains.
+
+HPC Centers provide different storage systems within the storage ecosystem.
+It can have a PFS, NFS Appliance, a Mid-tier Disk Store and a Tape Archival system.
+The storage systems all have their own level of data resilience such as RAID5, RAID6, Distributed Parity schemas, or replicas that allow for multiple copies within the storage system.
+The drawback with this setup is if a critical bug or catastrophic even happens and the data becomes unrecoverable.
+In centers the loss of a complete storage system can be the loss of the only copy of data.
+For data deem critical enough NGI will provide a mechanism to do replication or erasure coding across storage systems.
+In the event of partial system failure, such as RAID failure with too many parity chunks being lost or a tape failing and a whole file lost one can do replication and more cost effective erasure coding within a storage system.
+
+\section{Conclusions}
+While these views are introduced capabilities are expected to change, grow or be removed completely this forum is expected to get new ideas introduced and feedback from community forum members.
 
 
 \includegraphics[width=2cm]{ngi-logo}
